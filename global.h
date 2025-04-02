@@ -69,9 +69,16 @@ typedef
 	}
 	BoundType;
 
+typedef struct _UniqueSymbol UniqueSymbol;
+struct _UniqueSymbol {
+	Addr addr;
+	HChar* name;
+	UniqueSymbol* chain;
+};
+
 typedef struct _Record	Record;
 struct _Record {
-	Addr addr;
+	UniqueSymbol* symbol;
 #if RECORD_MODE == 3
 	BoundType bound;
 #else
@@ -97,6 +104,7 @@ typedef struct _CommandLineOptions	CommandLineOptions;
 struct _CommandLineOptions {
 	BoundRange* ranges;
 	const HChar* records_file;
+	const HChar* symbols_file;
 #if RECORD_MODE != 3
 	Bool coalesce;
 #endif
@@ -166,6 +174,15 @@ void LSG_(clear_all_ranges)(void);
 BoundType LSG_(addr2bound)(Addr addr);
 void LSG_(track_bound)(Addr addr, BoundType bound) VG_REGPARM(2);
 void LSG_(dump_records)(const HChar* filename);
+
+/* from symbols.c */
+void LSG_(init_symbols_pool)(void);
+void LSG_(destroy_symbols_pool)(void);
+UniqueSymbol* LSG_(get_symbol)(Addr addr);
+UniqueSymbol* LSG_(find_symbol)(Addr addr);
+Addr LSG_(symbol_addr)(UniqueSymbol* symbol);
+const HChar* LSG_(symbol_name)(UniqueSymbol* symbol);
+Bool LSG_(symbols_cmp)(UniqueSymbol* i1, UniqueSymbol* i2);
 
 /*------------------------------------------------------------*/
 /*--- Exported global variables                            ---*/

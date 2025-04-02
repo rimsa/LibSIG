@@ -64,6 +64,7 @@ Bool LSG_(process_cmd_line_option)(const HChar* arg) {
 		LSG_(add_new_range)(addr, size);
 	}
 	else if VG_STR_CLO(arg, "--records", LSG_(clo).records_file) {}
+	else if VG_STR_CLO(arg, "--symbols", LSG_(clo).symbols_file) {}
 #if RECORD_MODE != 3
 	else if VG_BOOL_CLO(arg, "--coalesce", LSG_(clo).coalesce) {}
 #endif
@@ -84,6 +85,7 @@ void LSG_(print_usage)(void) {
 "                                   (This option can be used multiple times)\n"
 "    --records=<f>                  The output file with all recorded bounds\n"
 "                                   (Use %%p to bind the pid to the file, e.g.: records-%%p.csv)\n"
+"    --symbols=<f>                  Symbols mapping (address,function) file\n"
 #if RECORD_MODE != 3
 "    --coalesce=no|yes              Coalesce the last calls together (if the same) with its count [no]\n"
 #endif
@@ -104,6 +106,7 @@ void LSG_(set_clo_defaults)(void) {
 	/* Default values for command line arguments */
 	LSG_(clo).ranges = 0;
 	LSG_(clo).records_file = 0;
+	LSG_(clo).symbols_file = 0;
 #if RECORD_MODE != 3
 	LSG_(clo).coalesce = False;
 #endif

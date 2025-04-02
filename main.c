@@ -178,6 +178,7 @@ void finish(void) {
 	}
 
 	LSG_(destroy_threads)();
+	LSG_(destroy_symbols_pool)();
 	LSG_(clear_all_ranges)();
 }
 
@@ -229,6 +230,7 @@ static void lsg_start_client_code_callback(ThreadId tid, ULong blocks_done) {
 
 static
 void LSG_(post_clo_init)(void) {
+	LSG_(init_symbols_pool)();
 	LSG_(init_threads)();
 	LSG_(run_thread)(1);
 }

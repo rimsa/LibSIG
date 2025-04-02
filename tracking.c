@@ -39,6 +39,7 @@
 #endif
 
 static VgFile* outfile = 0;
+static const HChar* unknown_name = "???";
 
 static
 const HChar* bound2str(BoundType bound) {
@@ -127,27 +128,38 @@ void LSG_(track_bound)(Addr addr, BoundType bound) {
 		LSG_(current_state).bound = bound;
 
 #if defined(RECORD_INBOUNDS_ONLY)
-        if (bound == Inbound) {
+		if (bound == Inbound) {
 #elif defined(RECORD_OUTBOUNDS_ONLY)
-        if (bound == Outbound) {
+		if (bound == Outbound) {
 #else
-        {
+		{
 #endif
 			Record* last = LSG_(current_state).records.last;
 #if !defined(RECORD_IN_AND_OUTBOUNDS)
-            if (last && last->addr == addr) {
-                last->count++;
-            } else {
+			if (last && LSG_(symbol_addr)(last->symbol) == addr)
+				last->count++;
+			else {
 #endif
-                Record* curr = (Record*)
-                    LSG_MALLOC("lsg.tracking.tb.1", sizeof(Record));
-                curr->addr = addr;
+				Record* curr = (Record*)
+					LSG_MALLOC("lsg.tracking.tb.1", sizeof(Record));
+				curr->symbol = LSG_(get_symbol)(addr);
+				LSG_ASSERT(curr->symbol != 0);
+
+				// If the symbol has no name, let's try to find one.
+				if (curr->symbol->name == 0) {
+					const HChar* tmp;
+					DiEpoch ep = VG_(current_DiEpoch)();
+
+					curr->symbol->name = LSG_STRDUP("lsg.tracking.tb.2",
+						(VG_(get_fnname)(ep, addr, &tmp) ? tmp : unknown_name));
+				}
+
 #if defined(RECORD_IN_AND_OUTBOUNDS)
-                curr->bound = bound;
+				curr->bound = bound;
 #else
-                curr->count = 1;
+				curr->count = 1;
 #endif
-                curr->next = 0;
+				curr->next = 0;
 
 				if (last) {
 					last->next = curr;
@@ -157,13 +169,13 @@ void LSG_(track_bound)(Addr addr, BoundType bound) {
 					LSG_(current_state).records.last = curr;
 				}
 #if !defined(RECORD_IN_AND_OUTBOUNDS)
-            }
+			}
 #endif
 
-            LSG_DEBUG(2, "Found %s at 0x%lx\n",
-                bound2str(bound),
-				(LSG_(current_state).records.last)->addr);
-        }
+			LSG_DEBUG(2, "Found %s at 0x%lx\n",
+				bound2str(bound),
+				LSG_(symbol_addr)((LSG_(current_state).records.last)->symbol));
+		}
 	}
 }
 
@@ -174,15 +186,20 @@ static void process_thread(thread_info* t) {
 
 	record = t->state.records.head;
 	while (record) {
+		Addr addr = LSG_(symbol_addr)(record->symbol);
+		const HChar* name = LSG_(symbol_name)(record->symbol);
+		if (name == 0)
+			name = unknown_name;
+
 #if defined(RECORD_IN_AND_OUTBOUNDS)
-		VG_(fprintf)(outfile, "0x%lx,%s\n", record->addr, bound2str(record->bound));
+		VG_(fprintf)(outfile, "0x%lx,%s,%s\n", addr, name, bound2str(record->bound));
 #else
 		if (LSG_(clo).coalesce)
-			VG_(fprintf)(outfile, "0x%lx,%d\n", record->addr, record->count);
+			VG_(fprintf)(outfile, "0x%lx,%s,%d\n", addr, name, record->count);
 		else {
 			UInt i;
 			for (i = 0; i < record->count; i++)
-				VG_(fprintf)(outfile, "0x%lx\n", record->addr);
+				VG_(fprintf)(outfile, "0x%lx,%s\n", addr, name);
 		}
 #endif
 		record = record->next;

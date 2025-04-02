@@ -165,7 +165,7 @@ void LSG_(switch_thread)(ThreadId tid) {
 }
 
 void LSG_(run_thread)(ThreadId tid) {
-    LSG_(switch_thread)(tid);
+	LSG_(switch_thread)(tid);
 }
 
 void LSG_(sync_current_thread)(void) {

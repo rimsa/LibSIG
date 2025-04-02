@@ -7,8 +7,7 @@ include $(top_srcdir)/Makefile.tool.am
 pkginclude_HEADERS =
 
 bin_SCRIPTS = \
-	libsig_symbols \
-	libsig_translator
+	libsig_symbols
 
 noinst_HEADERS = \
 	global.h
@@ -27,7 +26,8 @@ LIBSIG_SOURCES_COMMON = \
 	debug.c \
 	main.c \
 	threads.c \
-	tracking.c
+	tracking.c \
+	symbols.c
 
 libsig_@VGCONF_ARCH_PRI@_@VGCONF_OS@_SOURCES      = \
 	$(LIBSIG_SOURCES_COMMON)

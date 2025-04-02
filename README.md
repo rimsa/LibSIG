@@ -27,78 +27,48 @@ Build valgrind with libsig.
 
 ## Testing
 
-Compile a test program that orders numbers given in the argument's list. libsig works even when all of its symbols are stripped.
+Compile a test program that orders numbers given in the argument's list. libsig works even when
+all of its symbols are stripped.
 
     $ cd libsig/tests
     $ gcc -o test test.c
     $ strip -s test
 
-Now use this tool to record the libraries signature of this program.
+Use the [libsig_symbols](libsig_symbols) to extract symbols from the program.
+This includes the symbols that can be found in the PLT section, even if the program
+has no debugging symbols. Even if the program has no PLT section, if compiled with the
+`-fno-plt` option for example, our plugin can track the symbols from the GOT table.
 
-    $ valgrind -q --tool=libsig --records=records.csv -- ./test 15 4 8 16 42 23
+    $ libsig_symbols test > test.symbols
+
+Now load the symbols in the libsig tool to record the libraries signature of this program.
+In this example, we are coalescing the output if the same function is called multiple times
+in a row.
+
+    $ valgrind -q --tool=libsig --symbols=test.symbols --records=test.records --coalesce=yes -- ./test 15 4 8 16 42 23
     4 8 15 16 23 42
 
 Since this plugin supports multithreaded programs, the output file contains a commented line
 with the thread id followed by the recorded boundaries crosses with its address and how many
 times it was crossed consecutively. By default, the plugin considers the text section of the
 instrumentation program as the address range to track, but this can be changed by the `--bound`
-command line argument.
+command line argument. This option can be used multiple times.
 
-    $ cat records.csv
+    $ cat test.records
     # Thread: 1
-    0x4001100
-    0x4873f90
-    0x109000
-    0x4874010
-    0x1090c0
-    0x1090d0
-    0x1090d0
-    0x1090d0
-    0x1090d0
-    0x1090d0
-    0x1090d0
-    0x1090b0
-    0x1090b0
-    0x1090b0
-    0x1090b0
-    0x1090b0
-    0x1090b0
-    0x1090a0
-    0x109090
-    0x4874083
-    0x109080
-    0x4011f6b
+    0x4001100,???,1
+    0x4873f90,(below main),1
+    0x109000,.init,1
+    0x4874010,(below main),1
+    0x1090c0,malloc@plt,1
+    0x1090d0,atoi@plt,6
+    0x1090b0,printf@plt,6
+    0x1090a0,putchar@plt,1
+    0x109090,free@plt,1
+    0x4874083,(below main),1
+    0x109080,__cxa_finalize@plt,1
+    0x4011f6b,_dl_fini,1
 
-To translate addresses to library calls in the PLT section of a program, first
-use [libsig_symbols](libsig_symbols) to collect the program's symbols.
-Then, use the [libsig_translator](libsig_translator) to translate records file
-to symbol names.
-
-    $ libsig_symbols test > test.symbols
-    $ libsig_translator test.symbols records.csv
-    # Thread: 1
-    0x4001100
-    0x4873f90
-    .init
-    0x4874010
-    malloc@plt
-    atoi@plt
-    atoi@plt
-    atoi@plt
-    atoi@plt
-    atoi@plt
-    atoi@plt
-    printf@plt
-    printf@plt
-    printf@plt
-    printf@plt
-    printf@plt
-    printf@plt
-    putchar@plt
-    free@plt
-    0x4874083
-    __cxa_finalize@plt
-    0x4011f6b
-
-In this example, we can see that the test program calls `malloc` and `free` once, converts strings to numbers via `atoi` 6 times, prints the numbers using `printf` 6 times and ends with a call to `putchar`
-to print the end of line.
+In this example, we can see that the test program calls `malloc` and `free` once, converts
+strings to numbers via `atoi` 6 times, prints the numbers using `printf` 6 times and ends
+with a call to `putchar` to print the end of line.
