@@ -172,9 +172,10 @@ void LSG_(track_bound)(Addr addr, BoundType bound) {
 			}
 #endif
 
-			LSG_DEBUG(2, "Found %s at 0x%lx\n",
+			LSG_DEBUG(2, "Found %s at 0x%lx (%s)\n",
 				bound2str(bound),
-				LSG_(symbol_addr)((LSG_(current_state).records.last)->symbol));
+				LSG_(symbol_addr)((LSG_(current_state).records.last)->symbol),
+				LSG_(symbol_name)((LSG_(current_state).records.last)->symbol));
 		}
 	}
 }
