@@ -1,7 +1,7 @@
 diff -urN a/Makefile.am b/Makefile.am
---- a/Makefile.am	2024-11-01 02:07:00.000000000 -0300
-+++ b/Makefile.am	2025-01-22 18:52:37.730630829 -0300
-@@ -12,6 +12,7 @@
+--- a/Makefile.am	2025-05-20 07:59:39.000000000 -0300
++++ b/Makefile.am	2025-07-31 17:13:30.976933058 -0300
+@@ -14,6 +14,7 @@
  		massif \
  		dhat \
  		lackey \
@@ -10,9 +10,9 @@ diff -urN a/Makefile.am b/Makefile.am
  
  EXP_TOOLS = \
 diff -urN a/configure.ac b/configure.ac
---- a/configure.ac	2024-11-01 02:07:00.000000000 -0300
-+++ b/configure.ac	2025-01-22 18:53:01.295265053 -0300
-@@ -5683,6 +5683,8 @@
+--- a/configure.ac	2025-05-20 07:59:50.000000000 -0300
++++ b/configure.ac	2025-07-31 17:13:30.980933159 -0300
+@@ -5746,6 +5746,8 @@
     dhat/tests/Makefile
     lackey/Makefile
     lackey/tests/Makefile
