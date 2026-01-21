@@ -83,14 +83,14 @@ Although fast, the rtld-audit version has shortcomings when the binary does not 
 LibSIG has a Valgrind plugin version that can track when the code crosses boundaries from a code section, the text section of a program for example, to somewhere outside of it, a library code for example.
 Thus, this can also be used as a runtime signature for a program.
 
-To use LibSIG's Valgrind plugin version, first return back to the project's root directory (if you are in the tests directory by following the rtld-audit instructions) and download and unpack Valgrind (3.25.1).
+To use LibSIG's Valgrind plugin version, first return back to the project's root directory (if you are in the tests directory by following the rtld-audit instructions) and download and unpack Valgrind (3.26.0).
 
     $ cd ../
-    $ wget -qO - https://sourceware.org/pub/valgrind/valgrind-3.25.1.tar.bz2 | tar jxv
+    $ wget -qO - https://sourceware.org/pub/valgrind/valgrind-3.26.0.tar.bz2 | tar jxv
 
 Enter Valgrind's base directory, copy the plugin implementation and apply a patch to add the tool to its compilation chain.
 
-    $ cd valgrind-3.25.1
+    $ cd valgrind-3.26.0
     $ cp -R ../plugin libsig
     $ patch -p1 < libsig/libsig.patch
 
